@@ -165,6 +165,22 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   .verdict-row{flex-direction:column}
   .field-grid,.field-grid.c3{grid-template-columns:1fr}
 }
+
+/* OSINT CARDS */
+.osint-target-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.osint-field{display:flex;flex-direction:column;gap:4px}
+.osint-flabel{font-size:12px;color:var(--text2);font-weight:500}
+.osint-field input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;width:100%;outline:none;transition:border-color .15s}
+.osint-field input:focus{border-color:var(--accent)}
+@media(max-width:680px){.osint-target-grid{grid-template-columns:1fr}}
+.osint-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.osint-card{display:block;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:13px 14px;text-decoration:none;transition:all .15s;position:relative}
+.osint-card:hover{border-color:var(--accent);background:var(--accent-bg)}
+.osint-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.osint-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.osint-tag{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:2px 6px;display:inline-block}
+.osint-card:hover .osint-tag{border-color:var(--border2)}
+@media(max-width:680px){.osint-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -175,6 +191,8 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <button class="tab active" onclick="switchMain('escalation',this)">📋 Escalation</button>
     <button class="tab" onclick="switchMain('investigation',this)">🔍 Investigation</button>
     <button class="tab" onclick="switchMain('ports',this)">🔌 Ports</button>
+    <button class="tab" onclick="switchMain('osint',this)">🌐 OSINT</button>
+    <button class="tab" onclick="switchMain('eventids',this)">🪟 Event IDs</button>
   </div>
 </header>
 
@@ -702,6 +720,279 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div>
 </div>
 
+
+<!-- ══════════════════════════════════════════
+     OSINT TAB
+══════════════════════════════════════════ -->
+<div class="page" id="tab-osint">
+
+  <div style="margin-bottom:20px">
+    <div style="font-size:18px;font-weight:700;margin-bottom:3px">OSINT Tools</div>
+    <div style="color:var(--text2);font-size:13px">Fill in the target below — links auto-populate. Click to open in a new tab.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 Target</div>
+    <div class="osint-target-grid">
+      <div class="osint-field">
+        <div class="osint-flabel">IP Address</div>
+        <input type="text" id="osint-ip" placeholder="e.g. 185.220.101.45" oninput="updateOsintLinks()" />
+      </div>
+      <div class="osint-field">
+        <div class="osint-flabel">Domain / URL</div>
+        <input type="text" id="osint-domain" placeholder="e.g. malware-c2.net" oninput="updateOsintLinks()" />
+      </div>
+      <div class="osint-field">
+        <div class="osint-flabel">File Hash (MD5/SHA256)</div>
+        <input type="text" id="osint-hash" placeholder="e.g. d41d8cd98f00b204e9800998ecf8427e" oninput="updateOsintLinks()" />
+      </div>
+      <div class="osint-field">
+        <div class="osint-flabel">Email Address</div>
+        <input type="text" id="osint-email" placeholder="e.g. suspect@domain.com" oninput="updateOsintLinks()" />
+      </div>
+    </div>
+  </div>
+
+  <!-- IP Tools -->
+  <div class="card">
+    <div class="card-title">🌍 IP reputation & geolocation</div>
+    <div class="osint-grid">
+      <a class="osint-card" id="lnk-abuseipdb" href="https://www.abuseipdb.com" target="_blank">
+        <div class="osint-name">AbuseIPDB</div>
+        <div class="osint-desc">Check if IP is reported for malicious activity. Primary tool for IP reputation.</div>
+        <div class="osint-tag">IP</div>
+      </a>
+      <a class="osint-card" id="lnk-ipinfo" href="https://ipinfo.io" target="_blank">
+        <div class="osint-name">ipinfo.io</div>
+        <div class="osint-desc">Geolocation, ISP, ASN, hostname. Check if IP is Tor, VPN, or hosting provider.</div>
+        <div class="osint-tag">IP</div>
+      </a>
+      <a class="osint-card" id="lnk-shodan" href="https://www.shodan.io" target="_blank">
+        <div class="osint-name">Shodan</div>
+        <div class="osint-desc">What ports and services are exposed on this IP. Identify the server type.</div>
+        <div class="osint-tag">IP</div>
+      </a>
+      <a class="osint-card" id="lnk-bgpview" href="https://bgp.tools" target="_blank">
+        <div class="osint-name">BGP.Tools</div>
+        <div class="osint-desc">ASN and network ownership lookup. Who owns this IP range? Replaced BGPView which shut down Nov 2025.</div>
+        <div class="osint-tag">IP</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Domain Tools -->
+  <div class="card">
+    <div class="card-title">🔗 Domain & URL analysis</div>
+    <div class="osint-grid">
+      <a class="osint-card" id="lnk-urlscan" href="https://urlscan.io" target="_blank">
+        <div class="osint-name">URLScan.io</div>
+        <div class="osint-desc">Scan and screenshot a URL. Shows what the site loads, redirects, and external calls.</div>
+        <div class="osint-tag">Domain</div>
+      </a>
+      <a class="osint-card" id="lnk-whois" href="https://who.is" target="_blank">
+        <div class="osint-name">WHOIS</div>
+        <div class="osint-desc">Domain registration date, owner, registrar. Newly registered domains = red flag.</div>
+        <div class="osint-tag">Domain</div>
+      </a>
+      <a class="osint-card" id="lnk-mxtoolbox" href="https://mxtoolbox.com" target="_blank">
+        <div class="osint-name">MXToolbox</div>
+        <div class="osint-desc">DNS records, MX lookup, blacklist check. Good for email-related investigations.</div>
+        <div class="osint-tag">Domain</div>
+      </a>
+      <a class="osint-card" id="lnk-domaintools" href="https://whois.domaintools.com" target="_blank">
+        <div class="osint-name">DomainTools WHOIS</div>
+        <div class="osint-desc">Deep domain history, IP history, connected domains. Richer than basic WHOIS.</div>
+        <div class="osint-tag">Domain</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Hash & File Tools -->
+  <div class="card">
+    <div class="card-title">🦠 File hash & malware analysis</div>
+    <div class="osint-grid">
+      <a class="osint-card" id="lnk-vt" href="https://www.virustotal.com" target="_blank">
+        <div class="osint-name">VirusTotal</div>
+        <div class="osint-desc">Scan file hashes, IPs, domains, and URLs against 90+ AV engines. Primary malware tool.</div>
+        <div class="osint-tag">Hash · IP · Domain</div>
+      </a>
+      <a class="osint-card" id="lnk-malwarebazaar" href="https://bazaar.abuse.ch/browse/" target="_blank">
+        <div class="osint-name">MalwareBazaar</div>
+        <div class="osint-desc">Search known malware samples by hash. Check if file has been seen before.</div>
+        <div class="osint-tag">Hash</div>
+      </a>
+      <a class="osint-card" id="lnk-any-run" href="https://app.any.run" target="_blank">
+        <div class="osint-name">ANY.RUN</div>
+        <div class="osint-desc">Interactive malware sandbox. See what a file does when executed — C2 calls, registry changes.</div>
+        <div class="osint-tag">Hash · File</div>
+      </a>
+      <a class="osint-card" id="lnk-hybrid" href="https://www.hybrid-analysis.com" target="_blank">
+        <div class="osint-name">Hybrid Analysis</div>
+        <div class="osint-desc">Free malware analysis sandbox. Good alternative to ANY.RUN for hash lookups.</div>
+        <div class="osint-tag">Hash · File</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Threat Intel -->
+  <div class="card">
+    <div class="card-title">🕵️ Threat intelligence</div>
+    <div class="osint-grid">
+      <a class="osint-card" id="lnk-talos" href="https://talosintelligence.com" target="_blank">
+        <div class="osint-name">Cisco Talos</div>
+        <div class="osint-desc">Cisco's threat intel. IP and domain reputation, email sender score.</div>
+        <div class="osint-tag">IP · Domain</div>
+      </a>
+      <a class="osint-card" id="lnk-otx" href="https://otx.alienvault.com" target="_blank">
+        <div class="osint-name">AlienVault OTX</div>
+        <div class="osint-desc">Open threat exchange. Community threat intel — IOCs, pulses, attack campaigns.</div>
+        <div class="osint-tag">IP · Domain · Hash</div>
+      </a>
+      <a class="osint-card" id="lnk-threatfox" href="https://threatfox.abuse.ch/browse/" target="_blank">
+        <div class="osint-name">ThreatFox</div>
+        <div class="osint-desc">IOC database — search IPs, domains, hashes linked to malware families.</div>
+        <div class="osint-tag">IP · Domain · Hash</div>
+      </a>
+      <a class="osint-card" id="lnk-emailrep" href="https://emailrep.io" target="_blank">
+        <div class="osint-name">EmailRep</div>
+        <div class="osint-desc">Email address reputation. Check if email is linked to malicious activity or breaches.</div>
+        <div class="osint-tag">Email</div>
+      </a>
+    </div>
+  </div>
+
+</div><!-- /osint -->
+
+
+<!-- ══════════════════════════════════════════
+     EVENT IDs TAB
+══════════════════════════════════════════ -->
+<div class="page" id="tab-eventids">
+
+  <div style="margin-bottom:20px">
+    <div style="font-size:18px;font-weight:700;margin-bottom:3px">Windows Event ID Cheat Sheet</div>
+    <div style="color:var(--text2);font-size:13px">Everything from CCDL1. Know these by heart — they appear in every investigation.</div>
+  </div>
+
+  <!-- Authentication -->
+  <div class="card">
+    <div class="card-title">🔐 Authentication events</div>
+    <table class="port-table">
+      <thead><tr><th>Event ID</th><th>Name</th><th>What it means</th><th>SOC notes</th></tr></thead>
+      <tbody>
+        <tr><td class="port-num">4624</td><td class="port-name">Successful logon</td><td><span class="port-risk risk-safe">Normal</span></td><td class="port-note">Check Logon Type, source IP, workstation name. Type 10 (RDP) from external = escalate</td></tr>
+        <tr><td class="port-num">4625</td><td class="port-name">Failed logon</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">50+ per minute = brute force. Check if same username, same source IP. Followed by 4624 = success</td></tr>
+        <tr><td class="port-num">4634</td><td class="port-name">Logoff</td><td><span class="port-risk risk-safe">Normal</span></td><td class="port-note">Account logged off. Pair with 4624 to calculate session duration</td></tr>
+        <tr><td class="port-num">4648</td><td class="port-name">Logon using explicit credentials</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">Someone used runas or passed credentials explicitly. Lateral movement indicator — check source + target</td></tr>
+        <tr><td class="port-num">4672</td><td class="port-name">Special privileges assigned</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Admin-level privileges at logon. Always appears with 4624 for admin accounts</td></tr>
+        <tr><td class="port-num">4740</td><td class="port-name">Account locked out</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Too many failed attempts. May indicate brute force or misconfigured service</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Logon Types -->
+  <div class="card">
+    <div class="card-title">🔑 Logon types — inside event 4624</div>
+    <table class="port-table">
+      <thead><tr><th>Type</th><th>Name</th><th>What it means</th><th>SOC notes</th></tr></thead>
+      <tbody>
+        <tr><td class="port-num">2</td><td class="port-name">Interactive</td><td><span class="port-risk risk-safe">Normal</span></td><td class="port-note">Physical keyboard logon at the machine</td></tr>
+        <tr><td class="port-num">3</td><td class="port-name">Network</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Accessing shared folder or printer. NTLM + privileged account = Pass the Hash</td></tr>
+        <tr><td class="port-num">4</td><td class="port-name">Batch</td><td><span class="port-risk risk-safe">Normal</span></td><td class="port-note">Scheduled task ran. Check what task and when</td></tr>
+        <tr><td class="port-num">5</td><td class="port-name">Service</td><td><span class="port-risk risk-safe">Normal</span></td><td class="port-note">Service started. Unusual service account = investigate</td></tr>
+        <tr><td class="port-num">10</td><td class="port-name">RemoteInteractive</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">RDP session. External source IP + no VPN = escalate immediately</td></tr>
+        <tr><td class="port-num">7</td><td class="port-name">Unlock</td><td><span class="port-risk risk-safe">Normal</span></td><td class="port-note">Workstation unlocked. Normal unless from unexpected location</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Kerberos -->
+  <div class="card">
+    <div class="card-title">🎫 Kerberos authentication</div>
+    <table class="port-table">
+      <thead><tr><th>Event ID</th><th>Name</th><th>What it means</th><th>SOC notes</th></tr></thead>
+      <tbody>
+        <tr><td class="port-num">4768</td><td class="port-name">Kerberos TGT requested</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Ticket-Granting Ticket requested. Audit Failure = failed Kerberos auth. Source IP in Network Info = attacker IP</td></tr>
+        <tr><td class="port-num">4769</td><td class="port-name">Kerberos TGS requested</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Service ticket requested. Many 4769s for different services = Kerberoasting attack</td></tr>
+        <tr><td class="port-num">4771</td><td class="port-name">Kerberos pre-auth failed</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">Failed Kerberos login. Multiple = brute force or password spray against AD</td></tr>
+        <tr><td class="port-num">4776</td><td class="port-name">NTLM auth attempt</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">NTLM used instead of Kerberos. Check if expected — NTLM on privileged account = Pass the Hash indicator</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Account Management -->
+  <div class="card">
+    <div class="card-title">👤 Account & group management</div>
+    <table class="port-table">
+      <thead><tr><th>Event ID</th><th>Name</th><th>What it means</th><th>SOC notes</th></tr></thead>
+      <tbody>
+        <tr><td class="port-num">4720</td><td class="port-name">User account created</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">New account created. If created by attacker account = backdoor. Check who created it</td></tr>
+        <tr><td class="port-num">4722</td><td class="port-name">Account enabled</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Disabled account re-enabled. Could be re-activating a dormant backdoor account</td></tr>
+        <tr><td class="port-num">4723</td><td class="port-name">Password change attempt</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">User tried to change their own password</td></tr>
+        <tr><td class="port-num">4724</td><td class="port-name">Password reset</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">Admin reset a user's password. If attacker resets = account takeover</td></tr>
+        <tr><td class="port-num">4725</td><td class="port-name">Account disabled</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Account was disabled. Could be attacker disabling security accounts</td></tr>
+        <tr><td class="port-num">4726</td><td class="port-name">Account deleted</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">Account deleted. Attacker covering tracks — check who deleted it</td></tr>
+        <tr><td class="port-num">4728</td><td class="port-name">User added to security group</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">Added to a global security group. If Domain Admins = privilege escalation. Check CN= in Member field</td></tr>
+        <tr><td class="port-num">4732</td><td class="port-name">User added to local group</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">Added to local Administrators group. Privilege escalation on that machine</td></tr>
+        <tr><td class="port-num">4756</td><td class="port-name">User added to universal group</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Added to a universal security group. Similar to 4728 — check the group name</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Process & File -->
+  <div class="card">
+    <div class="card-title">⚙️ Process & file activity</div>
+    <table class="port-table">
+      <thead><tr><th>Event ID</th><th>Name</th><th>What it means</th><th>SOC notes</th></tr></thead>
+      <tbody>
+        <tr><td class="port-num">4688</td><td class="port-name">Process created</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">New process started. Check Process Command Line for suspicious args. Parent process matters — Word spawning PowerShell = malware</td></tr>
+        <tr><td class="port-num">4689</td><td class="port-name">Process exited</td><td><span class="port-risk risk-safe">Normal</span></td><td class="port-note">Process ended. Pair with 4688 to get execution duration</td></tr>
+        <tr><td class="port-num">4698</td><td class="port-name">Scheduled task created</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">New scheduled task. Malware uses this for persistence. Check task name and command</td></tr>
+        <tr><td class="port-num">4702</td><td class="port-name">Scheduled task updated</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Existing task modified. Could be attacker updating their persistence mechanism</td></tr>
+        <tr><td class="port-num">5145</td><td class="port-name">Network share object access</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">File accessed on network share. Relative Target Name = filename accessed. Look for .ps1, .bat, credential files</td></tr>
+        <tr><td class="port-num">4663</td><td class="port-name">Object access attempted</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Attempt to access a file or object. High volume on sensitive files = data staging</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sysmon -->
+  <div class="card">
+    <div class="card-title">🔬 Sysmon event IDs</div>
+    <div class="tip-box" style="margin-bottom:12px">Sysmon gives way more detail than Windows native logging. If Sysmon is deployed, use these first.</div>
+    <table class="port-table">
+      <thead><tr><th>Event ID</th><th>Name</th><th>What it means</th><th>SOC notes</th></tr></thead>
+      <tbody>
+        <tr><td class="port-num">EID 1</td><td class="port-name">Process Create</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Full command line, hash, parent process. Richer than 4688. Check Hashes field for MD5</td></tr>
+        <tr><td class="port-num">EID 3</td><td class="port-name">Network Connection</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Process made a network connection. DestinationIp + DestinationPort. Find reverse shell: filter binary name, keep hitting Find Next until end of list — last ProcessId is the shell</td></tr>
+        <tr><td class="port-num">EID 7</td><td class="port-name">Image Loaded</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">DLL loaded by a process. Unsigned DLLs loaded by legit processes = DLL injection</td></tr>
+        <tr><td class="port-num">EID 8</td><td class="port-name">CreateRemoteThread</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">Process injected code into another process. Classic malware injection technique</td></tr>
+        <tr><td class="port-num">EID 10</td><td class="port-name">ProcessAccess</td><td><span class="port-risk risk-danger">High</span></td><td class="port-note">Process accessed another process memory. LSASS access = credential dumping (Mimikatz)</td></tr>
+        <tr><td class="port-num">EID 11</td><td class="port-name">FileCreate</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">File created or overwritten. Check path — Temp, AppData, startup folders = suspicious</td></tr>
+        <tr><td class="port-num">EID 13</td><td class="port-name">Registry Value Set</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Registry key modified. Run keys = persistence. Check TargetObject path</td></tr>
+        <tr><td class="port-num">EID 22</td><td class="port-name">DNS Query</td><td><span class="port-risk risk-sus">Watch</span></td><td class="port-note">Process made a DNS lookup. QueryName shows domain. Random subdomains = C2 or tunneling</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Attack patterns -->
+  <div class="card">
+    <div class="card-title">⚔️ Attack patterns — event ID combinations</div>
+    <table class="port-table">
+      <thead><tr><th>Pattern</th><th>Events</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td class="port-name" style="color:var(--danger)">Brute force</td><td class="port-num" style="font-size:11px">4625 × 50+ then 4624</td><td class="port-note">Mass failures followed by success. Check if same source IP and username</td></tr>
+        <tr><td class="port-name" style="color:var(--danger)">Pass the Hash</td><td class="port-num" style="font-size:11px">4624 Type 3 + NTLM + privileged account</td><td class="port-note">Network logon using NTLM for a privileged account. Workstation Name = Linux = direct C2 connection</td></tr>
+        <tr><td class="port-name" style="color:var(--danger)">Lateral movement</td><td class="port-num" style="font-size:11px">4648 source → 4624 Type 10 destination</td><td class="port-note">Explicit credentials used then RDP session. Source machine is compromised host</td></tr>
+        <tr><td class="port-name" style="color:var(--danger)">Privilege escalation</td><td class="port-num" style="font-size:11px">4728 / 4732 — Domain Admins</td><td class="port-note">User added to Domain Admins or local Admins. Parse CN= from Member field for username</td></tr>
+        <tr><td class="port-name" style="color:var(--danger)">Backdoor creation</td><td class="port-num" style="font-size:11px">4720 then 4728 by same account</td><td class="port-note">New account created then immediately added to privileged group by attacker</td></tr>
+        <tr><td class="port-name" style="color:var(--danger)">Credential harvesting</td><td class="port-num" style="font-size:11px">5145 — .ps1 file on share</td><td class="port-note">Attacker accessed a PowerShell script on a network share. Relative Target Name = script filename</td></tr>
+        <tr><td class="port-name" style="color:var(--danger)">Kerberoasting</td><td class="port-num" style="font-size:11px">4769 × many — RC4 encryption</td><td class="port-note">Many service ticket requests with RC4 encryption type. Attacker collecting tickets to crack offline</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /eventids -->
+
 </div><!-- /main -->
 
 <script>
@@ -1213,6 +1504,46 @@ function switchMain(name, btn) {
 }
 
 rf();
+
+// ── OSINT LINKS ───────────────────────────────────────────────────────────
+function updateOsintLinks() {
+  const ip = document.getElementById('osint-ip').value.trim();
+  const domain = document.getElementById('osint-domain').value.trim();
+  const hash = document.getElementById('osint-hash').value.trim();
+  const email = document.getElementById('osint-email').value.trim();
+
+  const set = (id, url) => {
+    const el = document.getElementById(id);
+    if (el) el.href = url;
+  };
+
+  // IP tools
+  set('lnk-abuseipdb', ip ? `https://www.abuseipdb.com/check/${ip}` : 'https://www.abuseipdb.com');
+  set('lnk-ipinfo', ip ? `https://ipinfo.io/${ip}` : 'https://ipinfo.io');
+  set('lnk-shodan', ip ? `https://www.shodan.io/host/${ip}` : 'https://www.shodan.io');
+  set('lnk-bgpview', ip ? `https://bgp.tools/prefix/${ip}` : 'https://bgp.tools');
+
+  // Domain tools
+  const target = domain || ip;
+  set('lnk-urlscan', target ? `https://urlscan.io/search/#${encodeURIComponent(target)}` : 'https://urlscan.io');
+  set('lnk-whois', target ? `https://who.is/whois/${encodeURIComponent(target)}` : 'https://who.is');
+  set('lnk-mxtoolbox', target ? `https://mxtoolbox.com/SuperTool.aspx?action=dns&input=${encodeURIComponent(target)}` : 'https://mxtoolbox.com');
+  set('lnk-domaintools', target ? `https://whois.domaintools.com/${encodeURIComponent(target)}` : 'https://whois.domaintools.com');
+
+  // Hash / malware tools — use hash if present, fall back to domain or ip
+  const vtTarget = hash || domain || ip;
+  set('lnk-vt', vtTarget ? `https://www.virustotal.com/gui/search/${encodeURIComponent(vtTarget)}` : 'https://www.virustotal.com');
+  set('lnk-malwarebazaar', hash ? `https://bazaar.abuse.ch/browse.php?search=sha256%3A${encodeURIComponent(hash)}` : 'https://bazaar.abuse.ch/browse/');
+  set('lnk-any-run', 'https://app.any.run');
+  set('lnk-hybrid', hash ? `https://www.hybrid-analysis.com/search?query=${encodeURIComponent(hash)}` : 'https://www.hybrid-analysis.com');
+
+  // Threat intel
+  const tiTarget = ip || domain;
+  set('lnk-talos', tiTarget ? `https://talosintelligence.com/reputation_center/lookup?search=${encodeURIComponent(tiTarget)}` : 'https://talosintelligence.com');
+  set('lnk-otx', tiTarget ? `https://otx.alienvault.com/indicator/ip/${encodeURIComponent(tiTarget)}` : 'https://otx.alienvault.com');
+  set('lnk-threatfox', tiTarget ? `https://threatfox.abuse.ch/browse.php?search=ioc%3A${encodeURIComponent(tiTarget)}` : 'https://threatfox.abuse.ch/browse/');
+  set('lnk-emailrep', email ? `https://emailrep.io/${encodeURIComponent(email)}` : 'https://emailrep.io');
+}
 </script>
 </body>
 </html>
